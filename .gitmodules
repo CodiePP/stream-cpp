@@ -1,0 +1,3 @@
+[submodule "ext/sizebounded"]
+	path = ext/sizebounded
+	url = https://github.com/CodiePP/sizebounded.git
