@@ -9,39 +9,56 @@
  *
  */
 
-template <typename T, int sz>
-class dbstream : public stream<T,sz>
+class configuration
 {
   public:
-    dbstream(stream<T,sz> *s, stream<T,sz> *t) : stream<T,sz>(s,t) {}
-    virtual sizebounded<T,sz>& process(sizebounded<T,sz> &b) const {
-      b.transform([](int i, T v) -> T {
+    configuration() {}
+    ~configuration() {}
+    int nth { 2 };
+};
+
+template <typename Ct, typename Vt, int sz>
+class dbstream : public stream<Ct,Vt,sz>
+{
+  public:
+    dbstream(Ct *c, stream<Ct,Vt,sz> *s, stream<Ct,Vt,sz> *t)
+      : stream<Ct,Vt,sz>(c,s,t) {}
+    dbstream(stream<Ct,Vt,sz> *s, stream<Ct,Vt,sz> *t)
+      : stream<Ct,Vt,sz>(s,t) {}
+    virtual sizebounded<Vt,sz>& process(Ct const * const, sizebounded<Vt,sz> &b) const {
+      b.transform([](int i, Vt v) -> Vt {
           return v * 2;
       });
       return b;
     }
 };
 
-template <typename T, int sz>
-class chstream : public stream<T,sz>
+template <typename Ct, typename Vt, int sz>
+class chstream : public stream<Ct,Vt,sz>
 {
   public:
-    chstream(stream<T,sz> *s, stream<T,sz> *t) : stream<T,sz>(s,t) {}
-    virtual sizebounded<T,sz>& process(sizebounded<T,sz> &b) const {
-      b.map([](int i, T v) {
+    chstream(Ct *c, stream<Ct,Vt,sz> *s, stream<Ct,Vt,sz> *t)
+      : stream<Ct,Vt,sz>(c,s,t) {}
+    chstream(stream<Ct,Vt,sz> *s, stream<Ct,Vt,sz> *t)
+      : stream<Ct,Vt,sz>(s,t) {}
+    virtual sizebounded<Vt,sz>& process(Ct const * const, sizebounded<Vt,sz> &b) const {
+      b.map([](int i, Vt v) {
           std::cout << i << ": " << v << std::endl;
       });
       return b;
     }
 };
 
-template <typename T, int sz>
-class origstream : public stream<T,sz>
+template <typename Ct, typename Vt, int sz>
+class origstream : public stream<Ct,Vt,sz>
 {
   public:
-    origstream(stream<T,sz> *s, stream<T,sz> *t) : stream<T,sz>(s,t) {}
-    virtual sizebounded<T,sz>& process(sizebounded<T,sz> &b) const {
-      b.transform([](int i, T v)->T {
+    origstream(Ct *c, stream<Ct,Vt,sz> *s, stream<Ct,Vt,sz> *t)
+      : stream<Ct,Vt,sz>(c,s,t) {}
+    origstream(stream<Ct,Vt,sz> *s, stream<Ct,Vt,sz> *t)
+      : stream<Ct,Vt,sz>(s,t) {}
+    virtual sizebounded<Vt,sz>& process(Ct const * const, sizebounded<Vt,sz> &b) const {
+      b.transform([](int i, Vt v)->Vt {
           if (i < 10) {
             return 'a'+i;
           } else {
@@ -52,15 +69,23 @@ class origstream : public stream<T,sz>
     }
 };
 
-template <typename T, int sz>
-class upperstream : public stream<T,sz>
+template <typename Ct, typename Vt, int sz>
+class upperstream : public stream<Ct,Vt,sz>
 {
   public:
-    upperstream(stream<T,sz> *s, stream<T,sz> *t) : stream<T,sz>(s,t) {}
-    virtual sizebounded<T,sz>& process(sizebounded<T,sz> &b) const {
-      b.transform([](int i, T v)->T {
-          if (v <= 'z' && v >= 'a') {
-            return 'A' + v - 'a';
+    upperstream(Ct *c, stream<Ct,Vt,sz> *s, stream<Ct,Vt,sz> *t)
+      : stream<Ct,Vt,sz>(c,s,t) {}
+    upperstream(stream<Ct,Vt,sz> *s, stream<Ct,Vt,sz> *t)
+      : stream<Ct,Vt,sz>(s,t) {}
+    virtual sizebounded<Vt,sz>& process(Ct const * const c, sizebounded<Vt,sz> &b) const {
+      b.transform([&c](int i, Vt v)->Vt {
+          //c = nullptr;
+          if (c && i % c->nth == 0) {
+            if (v <= 'z' && v >= 'a') {
+              return 'A' + v - 'a';
+            } else {
+              return v;
+            }
           } else {
             return v;
           }
@@ -71,20 +96,23 @@ class upperstream : public stream<T,sz>
 
 int main (int argc, char **argv)
 {
+  configuration config;
+
   // push to target
-  sizebounded<int,21> d0;
+  constexpr int n = 21;
+  sizebounded<int,n> d0;
   d0.transform([](int i, int v) -> int {
       return i;
   });
-  chstream<int,21> s2(nullptr, nullptr);
-  dbstream<int,21> s1(nullptr, &s2);
-
+  chstream<configuration,int,n> s2(nullptr, nullptr);
+  dbstream<configuration,int,n> s1(nullptr, &s2);
   s1.push(d0);
 
   // pull from a src
-  origstream<char,12> s3(nullptr,nullptr);
-  upperstream<char,12> s4(&s3,nullptr);
-  chstream<char,12> s5(&s4,nullptr);
+  constexpr int len = 12;
+  origstream<configuration,char,len> s3(&config,nullptr,nullptr);
+  upperstream<configuration,char,len> s4(&config,&s3,nullptr);
+  chstream<configuration,char,len> s5(&config,&s4,nullptr);
   s5.pull();
 }
 
