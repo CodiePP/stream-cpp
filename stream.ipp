@@ -24,21 +24,23 @@ stream<Ct,Vt,sz>::~stream() {
 }
 
 template <typename Ct, typename Vt, int sz>
-void stream<Ct,Vt,sz>::push(sizebounded<Vt,sz> &b) const {
+void stream<Ct,Vt,sz>::push(int len, sizebounded<Vt,sz> &b) const {
   if (_tgt) {
-    _tgt->push(process(_config, b));
+    int len2 = process(_config, len, b);
+    _tgt->push(len2, b);
   } else {
-    process(_config, b);
+    process(_config,len, b);
   }
 }
 
 template <typename Ct, typename Vt, int sz>
-sizebounded<Vt,sz>& stream<Ct,Vt,sz>::pull() const {
+int stream<Ct,Vt,sz>::pull(sizebounded<Vt,sz> &b) const {
   if (_src) {
-    return process(_config, _src->pull());
+    int len = _src->pull(b);
+    int len2 = process(_config, len, b);
+    return len;
   } else {
-    auto b = new sizebounded<Vt,sz>();
-    return process(_config, *b);
+    return process(_config, sz, b);
   }
 }
 

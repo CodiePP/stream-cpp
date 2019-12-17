@@ -25,11 +25,11 @@ class dbstream : public stream<Ct,Vt,sz>
       : stream<Ct,Vt,sz>(c,s,t) {}
     dbstream(stream<Ct,Vt,sz> *s, stream<Ct,Vt,sz> *t)
       : stream<Ct,Vt,sz>(s,t) {}
-    virtual sizebounded<Vt,sz>& process(Ct const * const, sizebounded<Vt,sz> &b) const {
+    virtual int process(Ct const * const, int blen, sizebounded<Vt,sz> &b) const {
       b.transform([](int i, Vt v) -> Vt {
           return v * 2;
       });
-      return b;
+      return sz;
     }
 };
 
@@ -41,11 +41,11 @@ class chstream : public stream<Ct,Vt,sz>
       : stream<Ct,Vt,sz>(c,s,t) {}
     chstream(stream<Ct,Vt,sz> *s, stream<Ct,Vt,sz> *t)
       : stream<Ct,Vt,sz>(s,t) {}
-    virtual sizebounded<Vt,sz>& process(Ct const * const, sizebounded<Vt,sz> &b) const {
+    virtual int process(Ct const * const, int blen, sizebounded<Vt,sz> &b) const {
       b.map([](int i, Vt v) {
           std::cout << i << ": " << v << std::endl;
       });
-      return b;
+      return sz;
     }
 };
 
@@ -57,7 +57,7 @@ class origstream : public stream<Ct,Vt,sz>
       : stream<Ct,Vt,sz>(c,s,t) {}
     origstream(stream<Ct,Vt,sz> *s, stream<Ct,Vt,sz> *t)
       : stream<Ct,Vt,sz>(s,t) {}
-    virtual sizebounded<Vt,sz>& process(Ct const * const, sizebounded<Vt,sz> &b) const {
+    virtual int process(Ct const * const, int blen, sizebounded<Vt,sz> &b) const {
       b.transform([](int i, Vt v)->Vt {
           if (i < 10) {
             return 'a'+i;
@@ -65,7 +65,7 @@ class origstream : public stream<Ct,Vt,sz>
             return '7';
           }
       });
-      return b;
+      return sz;
     }
 };
 
@@ -77,7 +77,7 @@ class upperstream : public stream<Ct,Vt,sz>
       : stream<Ct,Vt,sz>(c,s,t) {}
     upperstream(stream<Ct,Vt,sz> *s, stream<Ct,Vt,sz> *t)
       : stream<Ct,Vt,sz>(s,t) {}
-    virtual sizebounded<Vt,sz>& process(Ct const * const c, sizebounded<Vt,sz> &b) const {
+    virtual int process(Ct const * const c, int blen, sizebounded<Vt,sz> &b) const {
       b.transform([&c](int i, Vt v)->Vt {
           //c = nullptr;
           if (c && i % c->nth == 0) {
@@ -90,7 +90,7 @@ class upperstream : public stream<Ct,Vt,sz>
             return v;
           }
       });
-      return b;
+      return sz;
     }
 };
 
@@ -106,13 +106,15 @@ int main (int argc, char **argv)
   });
   chstream<configuration,int,n> s2(nullptr, nullptr);
   dbstream<configuration,int,n> s1(nullptr, &s2);
-  s1.push(d0);
+  s1.push(d0.size(), d0);
 
   // pull from a src
   constexpr int len = 12;
+  sizebounded<char,len> d1;
   origstream<configuration,char,len> s3(&config,nullptr,nullptr);
   upperstream<configuration,char,len> s4(&config,&s3,nullptr);
   chstream<configuration,char,len> s5(&config,&s4,nullptr);
-  s5.pull();
-}
+  int blen=s5.pull(d1);
 
+  return 0;
+}

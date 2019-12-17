@@ -10,10 +10,10 @@ class stream
     stream(Ct *config, stream *src, stream *tgt);
     virtual ~stream();
 
-    void push(sizebounded<Vt,sz>&) const;
-    sizebounded<Vt,sz>& pull() const;
+    void push(int len, sizebounded<Vt,sz>&) const;
+    int pull(sizebounded<Vt,sz>&) const;
 
-    virtual sizebounded<Vt,sz>& process(Ct const * const, sizebounded<Vt,sz>&) const = 0;
+    virtual int process(Ct const * const, int len, sizebounded<Vt,sz>&) const = 0;
 
   private:
     Ct *_config;
