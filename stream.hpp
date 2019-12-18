@@ -13,7 +13,7 @@ class stream
     void push(int len, sizebounded<Vt,sz>&) const;
     int pull(sizebounded<Vt,sz>&) const;
 
-    virtual int process(Ct const * const, int len, sizebounded<Vt,sz>&) const = 0;
+    virtual int process(Ct const * const, int len, sizebounded<Vt,sz>&) const;
 
   private:
     Ct *_config;

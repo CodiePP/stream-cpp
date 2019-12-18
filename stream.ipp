@@ -24,6 +24,11 @@ stream<Ct,Vt,sz>::~stream() {
 }
 
 template <typename Ct, typename Vt, int sz>
+int stream<Ct,Vt,sz>::process(Ct const * const, int len, sizebounded<Vt,sz>&) const {
+  return 0;
+}
+
+template <typename Ct, typename Vt, int sz>
 void stream<Ct,Vt,sz>::push(int len, sizebounded<Vt,sz> &b) const {
   if (_tgt) {
     int len2 = process(_config, len, b);
