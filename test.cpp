@@ -116,5 +116,26 @@ int main (int argc, char **argv)
   chstream<configuration,char,len> s5(&config,&s4,nullptr);
   int blen=s5.pull(d1);
 
+  // push to target with inline function objects
+  constexpr int num = 5;
+  sizebounded<int,num> d2;
+  d2.transform([num](int i, int v) -> int {
+      return num-i;
+  });
+  stream<configuration,int,num> s7(nullptr, nullptr);
+  s7.processor([](configuration const * const, int, sizebounded<int,num>&b)->int
+      { b.map([](int i, int v) {
+          std::cout << i << ": " << v << std::endl;
+        });
+        return 0;
+      });
+  stream<configuration,int,num> s6(nullptr, &s7);
+  s6.processor([](configuration const * const, int len, sizebounded<int,num>&b)->int
+      { b.transform([](int i, int v) {
+          return v*3;
+        });
+        return len;
+      });
+  s6.push(d2.size(), d2);
   return 0;
 }
