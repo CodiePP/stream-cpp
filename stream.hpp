@@ -14,8 +14,8 @@ class stream
 
     void processor(std::function<int(Ct const * const, int,sizebounded<Vt,sz>&)>);
 
-    void push(int len, sizebounded<Vt,sz>&) const;
-    int pull(sizebounded<Vt,sz>&) const;
+    virtual void push(int len, sizebounded<Vt,sz>&) const;
+    virtual int pull(sizebounded<Vt,sz>&) const;
 
     virtual int process(Ct const * const, int len, sizebounded<Vt,sz>&) const;
 
