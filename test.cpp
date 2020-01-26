@@ -5,7 +5,7 @@
 #include <iostream>
 
 /*
- * compile: g++ -o test test.cpp -std=c++11 -g -I . -I ext/sizebounded
+ * compile: g++ -o test test.cpp -std=c++11 -g -I .. -I ext
  *
  */
 

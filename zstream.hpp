@@ -4,8 +4,8 @@
 #include <zlib.h>
 #include <functional>
 
-#include "sizebounded.hpp"
-#include "stream.hpp"
+#include "sizebounded/sizebounded.hpp"
+#include "stream-cpp/stream.hpp"
 
 
 // deflate stream (compress data)

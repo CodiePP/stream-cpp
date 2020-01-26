@@ -1,7 +1,7 @@
 
-#include "sizebounded.hpp"
-#include "sizebounded.ipp"
-#include "stream.hpp"
+#include "sizebounded/sizebounded.hpp"
+#include "sizebounded/sizebounded.ipp"
+#include "stream-cpp/stream.hpp"
 
 template <typename Ct, typename Vt, int sz>
 stream<Ct,Vt,sz>::stream(Ct *c, stream *s, stream *t) {

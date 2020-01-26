@@ -1,6 +1,6 @@
 
 /*
- * compile: g++ -o zinflate zstream-inflate.cpp -std=c++11 -g -I . -I ../ext/sizebounded -lz
+ * compile: g++ -o zinflate zstream-inflate.cpp -std=c++11 -g -I ../.. -I ../ext -lz
  *
  *
  */

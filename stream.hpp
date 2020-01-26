@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include "sizebounded.hpp"
+#include "sizebounded/sizebounded.hpp"
 
 template <typename Ct, typename Vt, int sz>
 class stream

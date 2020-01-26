@@ -1,7 +1,7 @@
 
-#include "stream.hpp"
-#include "stream.ipp"
-#include "zstream.hpp"
+#include "stream-cpp/stream.hpp"
+#include "stream-cpp/stream.ipp"
+#include "stream-cpp/zstream.hpp"
 
 #include <cstring>
 
