@@ -4,25 +4,26 @@
 
 #include "sizebounded/sizebounded.hpp"
 
-template <typename Ct, typename Vt, int sz>
+template <typename Ct, typename St, typename Vt, int sz>
 class stream
 {
   public:
-    stream(stream *src, stream *tgt);
-    stream(Ct *config, stream *src, stream *tgt);
+    stream(St *, stream *src, stream *tgt);
+    stream(Ct const * const config, St *, stream *src, stream *tgt);
     virtual ~stream();
 
-    void processor(std::function<int(Ct const * const, int,sizebounded<Vt,sz>&)>);
+    void processor(std::function<int(Ct const * const, St *, int,sizebounded<Vt,sz>&)>);
 
     virtual void push(int len, sizebounded<Vt,sz>&) const;
     virtual int pull(sizebounded<Vt,sz>&) const;
 
-    virtual int process(Ct const * const, int len, sizebounded<Vt,sz>&) const;
+    virtual int process(Ct const * const, St *, int len, sizebounded<Vt,sz>&) const;
 
   private:
-    Ct *_config;
+    Ct const * _config;
+    St *_state;
     stream *_src;
     stream *_tgt;
-    std::function<int(Ct const * const, int,sizebounded<Vt,sz>&)> _proc;
+    std::function<int(Ct const * const, St *, int,sizebounded<Vt,sz>&)> _proc;
 };
 

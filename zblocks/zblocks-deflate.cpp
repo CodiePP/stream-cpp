@@ -1,12 +1,12 @@
 
 /*
- * compile: g++ -o zinflate zstream-inflate.cpp -std=c++11 -g -I ../.. -I ../ext -lz
+ * compile: g++ -o zdeflate zblocks-deflate.cpp -std=c++11 -g -I ../.. -I ../ext -lz
  *
  *
  */
 
-#include "stream-cpp/zstream.hpp"
-#include "stream-cpp/zstream.ipp"
+#include "stream-cpp/zblocks.hpp"
+#include "stream-cpp/zblocks.ipp"
 
 #include <iostream>
 #include <zlib.h>
@@ -24,10 +24,10 @@ class zstate
   public:
     zstate() {}
     ~zstate() {}
-    int ncomp() const { return _ncomp; };
-    void ncomp(int n) { _ncomp+=n; };
+    int ndecmp() const { return _ndecmp; };
+    void ndecmp(int n) { _ndecmp+=n; };
   private:
-    int _ncomp{0};
+    int _ndecmp{0};
 };
 
 stream<zconf,zstate,char,sz>* prepare_stream(zstate & st, FILE *fout);
@@ -35,7 +35,7 @@ stream<zconf,zstate,char,sz>* prepare_stream(zstate & st, FILE *fout);
 int main (int argc, char **argv)
 {
     if (argc != 3) { exit(1); }
-    std::cout << "uncompressing " << argv[1] << std::endl;
+    std::cout << "compressing " << argv[1] << std::endl;
     std::cout << "to output " << argv[2] << std::endl;
 
     FILE *fout = fopen(argv[2], "wbx");
@@ -53,37 +53,37 @@ int main (int argc, char **argv)
 
     int ntot = 0;
     while (true) {
-        int nread = fread((char*)d0.ptr(), 1, 4096, fin);
+        int nread = fread((char*)d0.ptr(), 1, sz, fin);
         ntot += nread;
         zstream->push(nread, d0);
         if (feof(fin)) { break; }
     }
     fclose(fin);
 
-    int nhave = state.ncomp();
+    int nhave = state.ndecmp();
     zstream->push(0, d0); // flush
-    while (state.ncomp() - nhave >= sz) {
-        nhave = state.ncomp();
+    while (state.ndecmp() - nhave >= sz) {
+        nhave = state.ndecmp();
         zstream->push(0, d0); // flush
     }
     fclose(fout);
 
-    std::cout << "in total read " << ntot << " bytes and uncompressed to " << state.ncomp() << " bytes." << std::endl;
+    std::cout << "in total read " << ntot << " bytes and compressed to " << state.ndecmp() << " bytes." << std::endl;
 
 }
 
 stream<zconf,zstate,char,sz>* prepare_stream(zstate & st, FILE *fout)
 {
-    auto *sinfo = new stream<zconf,zstate,char,sz>(&st, nullptr, nullptr);
-    sinfo->processor([fout](zconf const * const _c, zstate *_st, int _l, sizebounded<char,sz>& _b)->int {
-            _st->ncomp(_l);
-            std::cout << " uncompressed = " << _st->ncomp() << " bytes." << std::endl;
+    auto *sinfo = new stream<zconf,zstate,char,sz>(nullptr, &st, nullptr, nullptr);
+    sinfo->processor([fout](zconf const * const _c, zstate * _st, int _l, sizebounded<char,sz>& _b)->int {
+            _st->ndecmp(_l);
+            std::cout << " compressed = " << _st->ndecmp() << " bytes." << std::endl;
             if (_l > 0) {
               int nw = fwrite((const char*)_b.ptr(), 1, _l, fout);
               std::cout << "     written " << nw << " bytes" << std::endl;
             }
             return _l;
         });
-    auto *inflater = new inflatestream<zconf,zstate,char,sz>(nullptr, sinfo);
-    return inflater;
+    auto *deflater = new deflatestream<zconf,zstate,char,sz>(nullptr, sinfo);
+    return deflater;
 }

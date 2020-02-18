@@ -1,7 +1,7 @@
 
 #include "stream-cpp/stream.hpp"
 #include "stream-cpp/stream.ipp"
-#include "stream-cpp/zstream.hpp"
+#include "stream-cpp/zblocks.hpp"
 
 #include <cstring>
 
@@ -50,7 +50,7 @@ int deflatestream<Ct,St,Vt,sz>::process(Ct const * const cfg, St *st, int len, s
     _strm.next_in = (unsigned char*)inbuf.ptr();
     _strm.avail_out = _buf.size();
     _strm.next_out = (unsigned char*)_buf.ptr();
-    int res = deflate(&_strm, len==0?Z_FINISH:Z_NO_FLUSH);
+    int res = deflate(&_strm, len==0?Z_FINISH:Z_SYNC_FLUSH);
     if (res != Z_OK && res != Z_STREAM_END) {
         std::cout << "failed to deflate: " << res << std::endl;
         deflateEnd(&_strm);

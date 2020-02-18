@@ -13,14 +13,24 @@
 
 static constexpr int sz = 4096;
 
-class configuration
+class zconfig
 {
   public:
-    configuration() {}
-    ~configuration() {}
+    zconfig() {}
+    ~zconfig() {}
+};
+class zstate
+{
+  public:
+    zstate() {}
+    ~zstate() {}
+    int ndecmp() const { return _ndecmp; };
+    void ndecmp(int n) { _ndecmp+=n; };
+  private:
+    int _ndecmp{0};
 };
 
-stream<configuration,char,sz>* prepare_stream(int & ncomp, FILE *fout);
+stream<zconfig,zstate,char,sz>* prepare_stream(zstate & st, FILE *fout);
 
 int main (int argc, char **argv)
 {
@@ -34,8 +44,8 @@ int main (int argc, char **argv)
         exit(1);
     }
 
-    int ncomp = 0;
-    auto *zstream = prepare_stream(ncomp, fout);
+    zstate state;
+    auto *zstream = prepare_stream(state, fout);
     sizebounded<char,sz> d0;
 
     FILE *fin = fopen(argv[1], "rb");
@@ -43,37 +53,36 @@ int main (int argc, char **argv)
 
     int ntot = 0;
     while (true) {
-        int nread = fread((char*)d0.ptr(), 1, 4096, fin);
+        int nread = fread((char*)d0.ptr(), 1, sz, fin);
         ntot += nread;
         zstream->push(nread, d0);
         if (feof(fin)) { break; }
     }
     fclose(fin);
 
-    int nhave = ncomp;
+    int nhave = state.ndecmp();
     zstream->push(0, d0); // flush
-    while (ncomp - nhave >= sz) {
-        nhave = ncomp;
+    while (state.ndecmp() - nhave >= sz) {
+        nhave = state.ndecmp();
         zstream->push(0, d0); // flush
     }
     fclose(fout);
 
-    std::cout << "in total read " << ntot << " bytes and compressed to " << ncomp << " bytes." << std::endl;
-
+    std::cout << "in total read " << ntot << " bytes and compressed to " << state.ndecmp() << " bytes." << std::endl;
 }
 
-stream<configuration,char,sz>* prepare_stream(int & ncomp, FILE *fout)
+stream<zconfig,zstate,char,sz>* prepare_stream(zstate & st, FILE *fout)
 {
-    auto *sinfo = new stream<configuration,char,sz>(nullptr, nullptr);
-    sinfo->processor([&ncomp,fout](configuration const * const _c, int _l, sizebounded<char,sz>& _b)->int {
-            ncomp += _l;
-            std::cout << " compressed = " << ncomp << " bytes." << std::endl;
+    auto *sinfo = new stream<zconfig,zstate,char,sz>(&st, nullptr, nullptr);
+    sinfo->processor([fout](zconfig const * const _c, zstate *_st, int _l, sizebounded<char,sz>& _b)->int {
+            _st->ndecmp(_l);
+            std::cout << " compressed = " << _st->ndecmp() << " bytes." << std::endl;
             if (_l > 0) {
               int nw = fwrite((const char*)_b.ptr(), 1, _l, fout);
               std::cout << "     written " << nw << " bytes" << std::endl;
             }
             return _l;
         });
-    auto *deflater = new deflatestream<configuration,char,sz>(nullptr, nullptr, sinfo);
+    auto *deflater = new deflatestream<zconfig,zstate,char,sz>(nullptr, sinfo);
     return deflater;
 }

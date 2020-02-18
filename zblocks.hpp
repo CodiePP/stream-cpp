@@ -14,7 +14,7 @@ class deflatestream : public stream<Ct,St,Vt,sz>
 {
   public:
     deflatestream(Ct const * const c, St *st, stream<Ct,St,Vt,sz> *s, stream<Ct,St,Vt,sz> *t);
-    deflatestream(stream<Ct,St,Vt,sz> *s, stream<Ct,St,Vt,sz> *t) : deflatestream(nullptr, nullptr, s, t) {}
+    deflatestream(stream<Ct,St,Vt,sz> *s, stream<Ct,St,Vt,sz> *t) : deflatestream(nullptr,nullptr,s,t) {}
     virtual ~deflatestream();
     virtual int process(Ct const * const, St *, int blen, sizebounded<Vt,sz> &b) const;
   private:
@@ -29,7 +29,7 @@ class inflatestream : public stream<Ct,St,Vt,sz>
 {
   public:
     inflatestream(Ct const * const c, St *st, stream<Ct,St,Vt,sz> *s, stream<Ct,St,Vt,sz> *t);
-    inflatestream(stream<Ct,St,Vt,sz> *s, stream<Ct,St,Vt,sz> *t) : inflatestream(nullptr, nullptr, s, t) {}
+    inflatestream(stream<Ct,St,Vt,sz> *s, stream<Ct,St,Vt,sz> *t) : inflatestream(nullptr,nullptr,s,t) {}
     virtual ~inflatestream();
     virtual int process(Ct const * const, St *, int blen, sizebounded<Vt,sz> &b) const;
     virtual void push(int len, sizebounded<Vt,sz>&) const;
