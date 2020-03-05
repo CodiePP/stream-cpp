@@ -57,9 +57,9 @@ int deflatestream<Ct,St,Vt,sz>::process(Ct const * const cfg, St *st, int len, s
         _ok = false;
         return -1;
     }
-    std::cout << "result: " << res << std::endl;
-    std::cout << "compressed in " << (len - _strm.avail_in) << " of " << len << " bytes." << std::endl;
-    std::cout << "compressed out " << (_buf.size() - _strm.avail_out) << " of " << _buf.size() << " bytes." << std::endl;
+    // std::cout << "result: " << res << std::endl;
+    // std::cout << "compressed in " << (len - _strm.avail_in) << " of " << len << " bytes." << std::endl;
+    // std::cout << "compressed out " << (_buf.size() - _strm.avail_out) << " of " << _buf.size() << " bytes." << std::endl;
     int ncomp = _buf.size() - _strm.avail_out;
     std::memcpy((void*)inbuf.ptr(), _buf.ptr(), ncomp);
     return ncomp;
@@ -107,9 +107,9 @@ int inflatestream<Ct,St,Vt,sz>::process(Ct const * const cfg, St *st, int len, s
       inflateEnd(&_strm);
       return {};
     }
-    std::cout << "result: " << res << std::endl;
-    std::cout << "decompressed in " << (len - _strm.avail_in) << " of " << len << " bytes." << std::endl;
-    std::cout << "decompressed out " << (sz - _strm.avail_out) << " of " << sz << " bytes." << std::endl;
+    // std::cout << "result: " << res << std::endl;
+    // std::cout << "decompressed in " << (len - _strm.avail_in) << " of " << len << " bytes." << std::endl;
+    // std::cout << "decompressed out " << (sz - _strm.avail_out) << " of " << sz << " bytes." << std::endl;
     int ndecmp = _buf.size() - _strm.avail_out;
     std::memcpy((void*)inbuf.ptr(), _buf.ptr(), ndecmp);
     return ndecmp;
